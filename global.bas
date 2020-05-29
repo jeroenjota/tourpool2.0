@@ -272,7 +272,7 @@ Dim filenaam As String
 Dim timestamp  As String
 
     iFileNr = FreeFile
-    filenaam = App.Path & "\vbpool20.log"
+    filenaam = App.Path & "\tourpool20.log"
     If timekolom Then
         timestamp = Format(Now(), "YYYY-MM-DD hh:nn:ss")
     Else
