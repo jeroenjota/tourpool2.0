@@ -10,9 +10,12 @@ Public thisTour As Long
 Public adminLogin As Boolean
 
 Public Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
+Public Declare Function LockWindowUpdate Lib "user32" (ByVal hwnd As Long) As Long
+ 
 
 Sub Main()
-    
+    thisTour = 2020
+    thisPool = 1
     'commandline arguments
     Dim i As Integer
     Dim strArgs() As String
@@ -31,15 +34,15 @@ Sub Main()
     write2Log "App started", True
     'check other instance of app
     If App.PrevInstance = True Then
-        MsgBox "VBPool2.0 draait al...."
+        MsgBox "TourPool2.0 draait al...."
         Exit Sub
     End If
     'set and open the database
     If Dir(App.Path & "\" & dbName & ".mdb") = "" Then
         createDb
-        write2Log "No vbpool2.mdb, dbcreated"
+        write2Log "No tourpool2.mdb, database created"
     End If
-    'now that the database is crated we can open the connection
+    'now that the database is created we can open the local connection
     With cn
         .ConnectionString = lclConn()
         .Open
@@ -47,8 +50,9 @@ Sub Main()
     
     'if there is a pools table with at least one record
     If recordsExist("tblPools", cn) Then
-        ' get last poolID
+        ' get last poolID on this machine
         thisPool = val(GetSetting(App.EXEName, "global", "lastpool", 0))
+        If thisPool = 0 Then thisPool = 1
     End If
     If thisPool Then
         thisTour = getThisPooltourId(cn)
@@ -164,7 +168,7 @@ Public Sub FillCombo(objComboBox As Object, _
 
 End Sub
 
-Sub fillList(objListBox As ListBox, _
+Sub fillList(objListBox As ListBoxW, _
               strSQL As String, _
               cn As ADODB.Connection, _
               strFieldToShow As String, _

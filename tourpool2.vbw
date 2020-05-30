@@ -1,6 +1,6 @@
-frmDeelnemerPloegen = 0, 0, 0, 0, C, 26, 26, 1136, 593, C
-global = 458, -11, 1568, 556, 
-dbfunctions = 208, 208, 1318, 775, 
+frmDeelnemerPloegen = 90, 16, 1305, 648, , 62, 30, 1172, 673, C
+global = 234, 459, 1758, 1233, 
+dbfunctions = 633, 4, 1743, 571, 
 dbDefinition = 234, 234, 1344, 801, 
-frmMain = 96, 232, 1206, 799, C, 199, 78, 1074, 623, C
-frmCompetitors = 131, 52, 1299, 716, , 182, 85, 1292, 749, C
+frmMain = 132, 354, 1242, 921, , 199, 78, 1074, 623, C
+frmCompetitors = 184, 357, 1352, 1021, , 182, 85, 1292, 749, C
