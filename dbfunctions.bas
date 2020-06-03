@@ -175,16 +175,16 @@ err_supportsTransactions:
     End Select
 End Function
 
-Function getTeamInfo(teamId As Long, fld As String, cn As ADODB.Connection)
+Function getDeelnemerInfo(id As Long, fld As String, cn As ADODB.Connection)
     Dim sqlstr As String
     Dim rs As ADODB.Recordset
     Set rs = New ADODB.Recordset
-    sqlstr = "Select * from tblTeamNames where teamNameId = " & teamId
+    sqlstr = "Select * from tblDeelnemers where DeelnemId = " & id
     rs.Open sqlstr, cn, adOpenKeyset, adLockReadOnly
     If Not rs.EOF Then
-        getTeamInfo = rs(fld)
+        getDeelnemerInfo = rs(fld)
     Else
-        getTeamInfo = Null
+        getDeelnemerInfo = Null
     End If
     rs.Close
     Set rs = Nothing
@@ -212,7 +212,7 @@ Function rennerInTourTeam(playerId As Long, teamId As Long, cn As ADODB.Connecti
     Dim rs As ADODB.Recordset
     Set rs = New ADODB.Recordset
     sqlstr = "Select * from tblTeamRenners where teamId = " & teamId
-    sqlstr = sqlstr & " AND RennerId = " & RennerId
+    sqlstr = sqlstr & " AND RennerId = " & rennerID
     sqlstr = sqlstr & " AND tourId = " & thisTour
     rs.Open sqlstr, cn, adOpenKeyset, adLockReadOnly
     
@@ -294,14 +294,31 @@ Dim ret(1 To 2)  As Integer
   Set rs = Nothing
 End Function
 
+Function getLastDeelnemerID(thisAddress As Long, cn As ADODB.Connection)
+'return the last deelnemerID for thisAddress
+Dim sqlstr As String
+Dim rs As ADODB.Recordset
+  Set rs = New ADODB.Recordset
+  sqlstr = "Select max(deelnemID) as ID from tblDeelnemers "
+  sqlstr = sqlstr & " WHERE poolID = " & thisPool
+  'sqlstr = sqlstr & " AND adresID = " & thisAddress
+  rs.Open sqlstr, cn, adOpenKeyset, adLockReadOnly
+  If Not rs.EOF Then
+    getLastDeelnemerID = rs!id
+  Else
+    getLastDeelnemerID = 0
+  End If
+  rs.Close
+  Set rs = Nothing
+End Function
+
 Function getLastPoolID(cn As ADODB.Connection)
 'get the ID of the last pool that was added
 Dim sqlstr As String
 Dim rs As ADODB.Recordset
-  sqlstr = "Select * from tblPools ORDER by poolid"
+  sqlstr = "Select MAX(poolID) from tblPools"
   rs.Open sqlstr, cn, adOpenKeyset, adLockReadOnly
   If Not rs.EOF Then
-    rs.MoveLast
     getLastPoolID = rs!poolid
   Else
     getLastPoolID = 0
@@ -309,3 +326,70 @@ Dim rs As ADODB.Recordset
   rs.Close
   Set rs = Nothing
 End Function
+
+Sub renumRennerPos(deelnemID As Long, cn As ADODB.Connection)
+ 'renumber the renners in the tblDeelnemerPloegen for renners that are still with us
+ Dim sqlstr As String
+ Dim rs As ADODB.Recordset
+ Dim i As Integer
+ Set rs = New ADODB.Recordset
+ sqlstr = "Select * from tblDeelnemerPloegen"
+ sqlstr = sqlstr & " WHERE deelnemID = " & deelnemID
+ sqlstr = sqlstr & " ORDER BY rennerpos"
+ rs.Open sqlstr, cn, adOpenKeyset, adLockOptimistic
+ For i = 1 To rs.RecordCount
+  rs!rennerpos = i
+  rs.Update
+  rs.MoveNext
+ Next
+ rs.Close
+ Set rs = Nothing
+End Sub
+
+
+Function FindInTable(cn As ADODB.Connection, tbl As String, fieldName As String, lookUpText As Variant, Optional skipID As Long, Optional idField As String)
+  Dim sqlstr As String
+  Dim rs As ADODB.Recordset
+  Set rs = New ADODB.Recordset
+  sqlstr = "Select * from " & tbl
+  sqlstr = sqlstr & " WHERE " & fieldName
+  If IsNumeric(lookUpText) Then
+    sqlstr = sqlstr & " = " & lookUpText
+  Else
+    sqlstr = sqlstr & " = '" & lookUpText & "'"
+  End If
+  If skipID Then
+    sqlstr = sqlstr & " AND " & idField & " <> " & skipID
+  End If
+  rs.Open sqlstr, cn, adOpenKeyset, adLockReadOnly
+  FindInTable = Not rs.EOF
+End Function
+
+
+Sub swapRenners(cn As ADODB.Connection, deelnemerID As Long, posA As Integer, posB As Integer)
+'swap the position of the renners in a deelnemer team
+  Dim savPos As Integer
+  Dim rs As ADODB.Recordset
+  Set rs = New ADODB.Recordset
+  Dim sqlstr As String
+  sqlstr = "Select * from tblDeelnemerPloegen Where deelnemId = " & deelnemerID
+  sqlstr = sqlstr & " ORDER BY rennerPos"
+  rs.Open sqlstr, cn, adOpenKeyset, adLockOptimistic
+  If posA < posB Then
+    rs.Find "rennerPos = " & posA
+    If Not rs.EOF Then
+      savPos = rs!rennerpos
+      rs!rennerpos = posB
+  Else
+    findPos = posB
+    rs!rennerpos = posB
+    
+    rs.MoveFirst
+    rs.Find "rennerpos = " & posB
+    If Not rs.EOF Then
+      savPosB = rs!rennerpos
+      rs!rennerpos = savPosA
+      
+  rs.Close
+  Set rs = Nothing
+End Sub

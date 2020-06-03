@@ -168,6 +168,7 @@ Public Sub FillCombo(objComboBox As Object, _
 
 End Sub
 
+
 Sub fillList(objListBox As ListBoxW, _
               strSQL As String, _
               cn As ADODB.Connection, _
@@ -189,7 +190,7 @@ Sub fillList(objListBox As ListBoxW, _
             Loop
         Else
             Do While Not oRS.EOF      '(with ItemData)
-                .AddItem oRS.Fields(strFieldToShow).Value
+                .AddItem nz(oRS.Fields(strFieldToShow).Value, "")
                 .ItemData(.NewIndex) = oRS.Fields(strFieldForItemData).Value
                 oRS.MoveNext
             Loop
